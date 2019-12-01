@@ -4,4 +4,4 @@
 
 ## Next navigate to server folder and run the server (node server.js)
 
-## After that navigate to test-tree-app folder and run next command (npm run start)
+## After that, in new terminal navigate to test-tree-app folder and run next command (npm run start)
