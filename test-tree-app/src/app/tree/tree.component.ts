@@ -1,11 +1,23 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { element } from 'protractor';
+import { ArrayType } from '@angular/compiler';
+interface ItemFromEvent {
+	childCode: string,
+	value: boolean
+};
+interface DataNode {
+	code: string,
+	description: string,
+	nodes: Array<object>,
+	isSelected?: boolean,
+	showChildren?: boolean
+};
 
 @Component({
 	selector: 'app-tree',
 	templateUrl: './tree.component.html',
 	styleUrls: ['./tree.component.css']
 })
+
 export class TreeComponent implements OnInit {
 	@Input() data;
 	@Input() isSelected;
@@ -13,26 +25,29 @@ export class TreeComponent implements OnInit {
 
 	@Output() notify: EventEmitter<object> = new EventEmitter<object>();
 
-	constructor() { }
+	constructor() {}
 
 	ngOnInit() {
-		this.data.forEach(obj => {
-			obj.showChildren = false;
-			obj.isSelected = this.isSelected;
+		this.data.forEach(item => {
+			item.showChildren = false;
+			item.isSelected = this.isSelected;
 		});
 	}
 
-	getNodeByCode(data, code) {
-		let foundedNode = data.find(element => {
+	trackByFn(index) {
+    return index;
+  }
+
+	getNodeByCode(data: Array<object>, code: string) {
+		let foundedNode = data.find((element: DataNode) => {
 			return element.code === code;
 		});
 
 		if (foundedNode) {
 			return foundedNode;
 		} else {
-			data.forEach(node => {
+			data.forEach((node: DataNode) => {
 				if (node.nodes.length) {
-					console.log(node.code);
 					return node.nodes.some((node, index, nodes) => this.getNodeByCode(nodes, code));
 				}
 			});
@@ -40,8 +55,8 @@ export class TreeComponent implements OnInit {
 
 	}
 
-	getParentCode(obj){
-		let parentCode = obj.childCode.slice(0, -1);
+	getParentCode(item: ItemFromEvent){
+		let parentCode = item.childCode.slice(0, -1);
 		if (parentCode.substr(-1) === '.') {
 			parentCode = parentCode.slice(0, -1);
 		};
@@ -49,7 +64,7 @@ export class TreeComponent implements OnInit {
 	}
 
 	checkChildrenSelection(parentNode){
-		if (parentNode.nodes.every(elem => elem.isSelected)) {
+		if (parentNode.nodes.every((elem) => elem.isSelected)) {
 			parentNode.isSelected = true;
 
 			this.notify.emit({
@@ -66,39 +81,30 @@ export class TreeComponent implements OnInit {
 		}
 	}
 
-	onNotifyRecieved(obj) {
-		const parentCode = this.getParentCode(obj);
+	onNotifyRecieved(item: ItemFromEvent) {
+		const parentCode = this.getParentCode(item);
 		const parentNode = this.getNodeByCode(this.data, parentCode);
 
 		this.checkChildrenSelection(parentNode);
 	}
 
-	toggleView(obj) {
-		obj.showChildren = !obj.showChildren;
+	toggleView(item: DataNode) {
+		item.showChildren = !item.showChildren;
 	}
 
-	toggleSelection(obj) {
-		if (obj.isSelected !== true) {
-			this.toggleSelectionForParentAndAllChildren(obj, true);
-			
-			this.notify.emit({
-				childCode: obj.code,
-				value: true
-			});
-		} else {
-			this.toggleSelectionForParentAndAllChildren(obj, false);
-
-			this.notify.emit({
-				childCode: obj.code,
-				value: false
-			});
-		}
+	toggleSelection(item: DataNode) {
+		this.toggleSelectionForParentAndAllChildren(item, !item.isSelected);
+		
+		this.notify.emit({
+			childCode: item.code,
+			value: !item.isSelected
+		});
 	}
 
-	toggleSelectionForParentAndAllChildren(obj, toState) {
-		obj.isSelected = toState;
-		if (obj.nodes.length){
-			obj.nodes.forEach(element => this.toggleSelectionForParentAndAllChildren(element, toState));
+	toggleSelectionForParentAndAllChildren(item: DataNode, toState: boolean) {
+		item.isSelected = toState;
+		if (item.nodes.length){
+			item.nodes.forEach((element: DataNode) => this.toggleSelectionForParentAndAllChildren(element, toState));
 		}
 	}
 

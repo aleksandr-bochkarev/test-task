@@ -1,4 +1,4 @@
-<div *ngFor="let rootElement of data | filter:searchInput" class="parent">
+<div *ngFor="let rootElement of data | filter:searchInput; trackBy: trackByFn" class="parent">
 
 	<input type="checkbox" [(checked)]="rootElement.isSelected" (change)="toggleSelection(rootElement)"/>
 
