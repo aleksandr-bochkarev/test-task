@@ -2,7 +2,7 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.20.
 
-## To run server
+## To run app
 
 Run `npm run start` for a dev server.
 
