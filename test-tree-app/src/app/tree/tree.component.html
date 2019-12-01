@@ -1,0 +1,19 @@
+<div *ngFor="let rootElement of data | filter:searchInput" class="parent">
+
+	<input type="checkbox" [(checked)]="rootElement.isSelected" (change)="toggleSelection(rootElement)"/>
+
+	<span (click)="toggleView(rootElement)">
+		{{ rootElement.code }} {{ rootElement.description }}
+	</span>
+
+	<div *ngIf="rootElement.nodes" class="children">
+		<div *ngIf="rootElement.showChildren">
+			<app-tree 
+				[data]="rootElement.nodes"
+				[isSelected]="rootElement.isSelected"
+				(notify)="onNotifyRecieved($event)">
+			</app-tree>
+		</div>
+	</div>
+
+</div>
